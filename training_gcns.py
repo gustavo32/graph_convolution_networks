@@ -153,7 +153,7 @@ if __name__ == "__main__":
     for pretrained_cnn in ['vgg19', 'resnet50', 'inceptionv3', 'efficientnetb7']:
         print(pretrained_cnn)
         storage = 'gcn/storage/' + pretrained_cnn
-        for n_hidden, lr, dropout in product([32, 128, 256], [1e-2, 5e-2, 1e-3, 5e-3], [0.3, 0.5, 0.8, 0.9]):
+        for n_hidden, lr, dropout in product([32, 128, 256], [1e-2, 5e-2, 1e-3, 5e-3, 1e-4, 5e-4], [0.3, 0.5, 0.8, 0.9]):
             checkpoint = checkpoint_format.format(arch_gcn, pretrained_cnn, n_hidden, dropout, lr)
             if os.path.isfile(checkpoint + '/cp.pt'):
                 continue 

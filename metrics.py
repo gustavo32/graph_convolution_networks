@@ -18,13 +18,14 @@ class Metrics():
             self.labels = np.asarray(list(ds.map(lambda feat, lbl: lbl).as_numpy_iterator()))
         elif isinstance(ds, NPDataset):
             self.features = ds.X
-            self.labels = ds.y
+            labels = ds.y
         else:
             self.features = ds
             
         if backend == 'pytorch':
             self.labels = labels[mask]
         else:
+            print(labels)
             self.labels = np.argmax(labels, axis=1)
                 
         self.mask = mask

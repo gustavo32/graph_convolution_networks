@@ -16,11 +16,11 @@ from metrics import Metrics
 from itertools import product
 
 if __name__ == "__main__":
-    batch_size = 32
+    batch_size = 512
     root = ''
     dataset = 'dataset'
     level = 'global'
-    extract_format = 'cnn'
+    extract_format = 'dense'
     handler_mode = 'np'
     
     if extract_format == 'cnn':
@@ -34,10 +34,12 @@ if __name__ == "__main__":
         print(pretrained_cnn)
         handler = pdata.CNNHandler(dataset, pretrained_cnn, level, root=root, extract_format=extract_format, n_last_conv=n_last_conv)
         train_ds, test_ds = handler.create_datasets(handler_mode, batch_size)
-        print(train_ds.X.shape)
-
+        
+        # pd.Series(np.squeeze(handler.one_hot.inverse_transform(test_ds.y)), index=np.argmax(test_ds.y, axis=1)).to_csv('categories_' + pretrained_cnn, sep='\t')
+        # continue
+    
         storage = root + 'cnn/storage/' + pretrained_cnn
-        for n_hidden, lr, dropout in product([32, 128, 256], [1e-2, 5e-2, 1e-3, 5e-3], [0.3, 0.5, 0.8, 0.9]):
+        for n_hidden, lr, dropout in product([32, 128, 256], [1e-2, 5e-2, 1e-3, 5e-3, 5e-4, 1e-4], [0.3, 0.5, 0.8, 0.9]):
             checkpoint = checkpoint_format.format(pretrained_cnn, level, n_hidden, dropout, lr)
             if os.path.isfile(checkpoint + '/cp.index'):
                 if extract_format == 'cnn':
@@ -60,8 +62,8 @@ if __name__ == "__main__":
                     model.fit(train_ds, epochs=2000, steps_per_epoch=len(self.classes_path) // batch_size)
             
             model.save_weights(checkpoint + '/cp')
-            
             mtc = Metrics(test_ds, backend='tensorflow')
+            mtc.save_metrics(checkpoint, model)
             mtc.save_record(root + 'cnn/' + level + '_results.txt', extract_format, pretrained_cnn, lr, dropout, n_hidden, mtc.evaluate(model))
             
             if extract_format == 'cnn':
